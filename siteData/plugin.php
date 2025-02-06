@@ -12,29 +12,31 @@ class sitedata extends Plugin
 
         $content = html_entity_decode($page->content());
 
-        function siteDataReturn($matches)
-        {
-            $match = $matches[1];
+      
+
+        function siteDataReturn($matches){
+            $match = trim($matches[1]); // Usuwamy ewentualne białe znaki
             $file = file_get_contents(PATH_CONTENT . 'SiteDataSettings.json');
             $jsfile = json_decode($file, true);
-
+        
             foreach ($jsfile as $item) {
                 if ($item['id'] == $match) {
-                    return str_replace("\u0027", "'", $item['data']);
-                    ;
+                    return htmlspecialchars_decode(str_replace("\u0027", "'", $item['data']), ENT_QUOTES);
                 }
-                ;
             }
-            ;
-        }
-        ;
+            return ''; 
+        };
+
+       
+
 
         $newcontent = preg_replace_callback(
-            '/\\[% siteData=(.*) %\\]/i',
+            '/\[%\s*siteData=(.*?)\s*%\]/i',
             "siteDataReturn",
             $content
         );
-        $content = $newcontent;
+        
+        $content = html_entity_decode($newcontent, ENT_QUOTES);
 
         $page->setField('content', $content);
 
